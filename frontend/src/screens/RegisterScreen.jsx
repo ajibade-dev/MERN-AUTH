@@ -1,93 +1,103 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
-import {Link, useNavigate} from "react-router-dom"
-import { useSelector, useDispatch } from 'react-redux'
-import {Form, Button, Row, Col } from 'react-bootstrap'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from "react-router-dom"
+import { useSelector } from 'react-redux'
+import { Form, Button, Row, Col } from 'react-bootstrap'
 import FormContainer from '../components/FormContainer'
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify'
 import Loader from '../components/Loader'
-import { useLoginMutation, useRegisterMutation } from '../slices/usersApiSlice'
-import {setCredentials} from '../slices/authSlices'
+import { useRegisterMutation } from '../slices/usersApiSlice'
 
 const RegisterScreen = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName]             = useState('')
+  const [email, setEmail]           = useState('')
+  const [password, setPassword]     = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const navigate= useNavigate();
-  const dispatch = useDispatch();
-
-  const {userInfo} = useSelector((state) => state.auth)
+  const navigate = useNavigate()
+  const { userInfo } = useSelector(state => state.auth)
 
   const [register, { isLoading }] = useRegisterMutation()
 
+  // If already logged in, go to profile
   useEffect(() => {
     if (userInfo) {
-      navigate('/profile');
+      navigate('/profile')
     }
-  }, [navigate, userInfo]);
+  }, [navigate, userInfo])
 
-  const submitHandler = async (e) => {
+  const submitHandler = async e => {
     e.preventDefault()
-    if (password !== confirmPassword){
-      toast.error('Passwords do not match');
-    }else{
-      try {
-        const res = await register ({ name, email, password }).unwrap();
-        dispatch(setCredentials({...res}));
-        navigate('/login')
-      } catch (err) {
-        toast.error(err?.data?.message || err.error)
-      }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+    try {
+      await register({ name, email, password }).unwrap()
+      toast.success('Registration successful! Please sign in.')
+      navigate('/login')
+    } catch (err) {
+      toast.error(err?.data?.message || err.error)
     }
   }
 
   return (
     <FormContainer>
       <h1>Sign Up</h1>
-      <Form onSubmit={ submitHandler}>
-
-        {/* name */}
-      <Form.Group className='my-2' controlId='email'>
-          <Form.Label>Your Name Please?</Form.Label>
-          <Form.Control type='text' placeholder='Enter your name' value={name} onChange={ (e) => setName(e.target.value)}>
-
-          </Form.Control>
+      <Form onSubmit={submitHandler}>
+        {/* Name */}
+        <Form.Group controlId='name' className='my-2'>
+          <Form.Label>Your Name</Form.Label>
+          <Form.Control
+            type='text'
+            placeholder='Enter your name'
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
         </Form.Group>
 
-        {/* for email */}
-        <Form.Group className='my-2' controlId='email'>
+        {/* Email */}
+        <Form.Group controlId='email' className='my-2'>
           <Form.Label>Email Address</Form.Label>
-          <Form.Control type='email' placeholder='Enter email' value={email} onChange={ (e) => setEmail(e.target.value)}>
-
-          </Form.Control>
+          <Form.Control
+            type='email'
+            placeholder='Enter email'
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+          />
         </Form.Group>
-    
-      {/* for password */}
-        <Form.Group className='my-2' controlId='password'>
+
+        {/* Password */}
+        <Form.Group controlId='password' className='my-2'>
           <Form.Label>Password</Form.Label>
-          <Form.Control type='password' placeholder='Enter Password' value={password} onChange={ (e) => setPassword(e.target.value)}>
-
-          </Form.Control>
+          <Form.Control
+            type='password'
+            placeholder='Enter password'
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
         </Form.Group>
 
-        {/* confirm Paswword */}
-         <Form.Group className='my-2' controlId='confirmPassword'>
+        {/* Confirm Password */}
+        <Form.Group controlId='confirmPassword' className='my-2'>
           <Form.Label>Confirm Password</Form.Label>
-          <Form.Control type='password' placeholder='Re-enter Password' value={confirmPassword} onChange={ (e) => setConfirmPassword(e.target.value)}>
-
-          </Form.Control>
+          <Form.Control
+            type='password'
+            placeholder='Re-enter password'
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+          />
         </Form.Group>
 
-        {isLoading && <Loader /> }
-        {/* for button to login */}
+        {isLoading && <Loader />}
+
         <Button type='submit' variant='primary' className='mt-3'>
           Sign Up
         </Button>
+
         <Row className='py-3'>
           <Col>
-          Existing Customer? <Link to="/login">Login</Link></Col>
+            Existing Customer? <Link to="/login">Login</Link>
+          </Col>
         </Row>
       </Form>
     </FormContainer>
