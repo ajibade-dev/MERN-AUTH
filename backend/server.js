@@ -7,10 +7,30 @@ import connectDB from './config/db.js'
 const port = process.env.PORT || 5000;
 import userRoutes from './routes/userRoutes.js'
 import path from 'path'
+import cors from 'cors'
+
+
 
 connectDB();
 
 const app = express();
+
+// Allow requests from your Vercel domain
+const whitelist = ['https://mern-auth-orpin-tau.vercel.app'];  // your frontend URL
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));  // Enable CORS with the custom options
+
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
